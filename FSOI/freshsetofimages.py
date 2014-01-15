@@ -8,6 +8,7 @@ import os
 import configparser
 import imagehandler
 import urllib
+import sys
 import time
 from distutils.version import StrictVersion
 import DisplayBundle
@@ -24,6 +25,9 @@ class FSIGUI:
         self.setupUI()
 
     def setupUI(self):
+        RIGHTMOUSE='<Button-3>'
+        if sys.platform=='darwin':
+            RIGHTMOUSE='<Button-2>'
         self.root=Tk()
 
         #basic properties
@@ -46,7 +50,7 @@ class FSIGUI:
         self.sources=ttk.Treeview(sourcesframe,columns=('Enabled','Name','Source'), show='headings',selectmode='browse')
         self.sources.grid(column=0,row=0,columnspan=2,padx=5,pady=5,sticky='NSEW')
         self.sources.bind('<Double-1>', self.OnSourceDoubleClick)
-        self.sources.bind('<Button-3>', self.rightclick_listitem)
+        self.sources.bind(RIGHTMOUSE, self.rightclick_listitem)
         
         self.sources.tag_configure('enable_color', background='#CCFFCC')
         self.sources.tag_configure('noenable_color', background='#FFCCCC')
