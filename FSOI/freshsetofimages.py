@@ -9,6 +9,8 @@ import time
 import configparser
 import imagehandler
 import threading
+import shelve
+from contextlib import closing
 from distutils.version import StrictVersion
 
 from tkinter import *
@@ -154,13 +156,17 @@ class FSIGUI:
         # user right clicked something.
         self.sources.selection_set(rowitem)
         rcmenu = Menu(self.root, tearoff=0)
-        if self.sources.item(rowitem, 'values')[0] == 'Disabled':
+        plugin_disabled=self.sources.item(rowitem, 'values')[0] == 'Disabled'
+        if plugin_disabled:
             rcmenu.add_command(label='Plugin is disabled...',
                                command=self.plugin_disabled_click)
+        rcmenu.add_command(label='Plugin options',state='disabled' if plugin_disabled else 'active')
+        rcmenu.add_command(label='Uninstall plugin')
         rcmenu.post(event.x_root, event.y_root)
 
     def plugin_disabled_click(self):
         PluginDisabledDialog(self.root)
+
 
     def get_plugin_path(self):
         startdir = None
@@ -232,6 +238,16 @@ class FSIGUI:
                 if vals[0] == 'Yes':
                     vals[0] = 'No'
             self.sources.item(item, values=vals)
+            pluginpath = self.plugin_location.get() #Should eventually put htis in a try block.
+            db_file = '{}plugins.db'.format(pluginpath)
+            print(db_file,'doubleclick')
+            if os.path.isfile('{}.dat'.format(db_file)):
+                with closing(shelve.open(db_file, writeback=True)) as pdb:
+                    try:
+                        print('Writing keys %s to %s',(item,vals[0]))
+                        pdb[item]=vals[0]
+                    except:
+                        print('Couldn\'t write to the DB.')
             self.update_row_color(item)
 
     def populateTree(self):

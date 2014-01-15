@@ -9,7 +9,9 @@ import os
 import urllib
 import importlib
 import re
+import shelve
 import SourceBase
+from contextlib import closing
 import inspect
 import importlib.machinery
 
@@ -116,8 +118,8 @@ class imagehandler:
         # This list contains the information that will be injected into the
         # tree.
         sourcesinfo = []
-        plugins = self.get_sources()
-        for plugin in plugins:
+        self.plugins = self.get_sources()
+        for plugin in self.plugins:
             if plugin[self.PLUGINID] != 'undefined':
                 # set all the plugins via this map.
                 self.downloaders[plugin[self.PLUGINID]
@@ -135,6 +137,7 @@ class imagehandler:
             else:
                 print('Plugin', plugin[0],
                       'does not have the id set, ignoring.')
+        sourcesinfo=self.load_plugin_database(sourcesinfo)
         return sourcesinfo
 
     def get_sources(self):
@@ -185,6 +188,25 @@ class imagehandler:
                             classid_map.append((cls.pluginid, True, plugin))
         return classid_map
 
+    def load_plugin_database(self,sourcesinfo):
+        '''Reads the plugin database, and configures previous on/off configurations.
+        '''
+        
+        pluginpath = self.parent.plugin_location.get() #Should eventually put htis in a try block.
+        db_file = '{}plugins.db'.format(pluginpath)
+        print(db_file,'load database')
+        with closing(shelve.open(db_file)) as pdb:
+            print(list(pdb.keys()))
+            for source in sourcesinfo:
+                if source[1]=='':
+                    #Not disabled
+                    print('Loading from database.')
+                    try:
+                        source[1]=pdb[source[0]]
+                    except:
+                        print('Plugin %s isn\'t in the database. It will default to true.' % source[0])
+        return sourcesinfo
+            
     def load_plugin_dependencies(self, plugin):
         dependencies = plugin.get_dependencies()
         for dependency in dependencies:
