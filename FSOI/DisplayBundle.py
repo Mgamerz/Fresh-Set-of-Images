@@ -5,8 +5,9 @@ Created on Jan 12, 2014
 '''
 
 class DisplayBundle:
+    '''Contains information that will be passed to all plugins when trying to get images. They might use this
+    to limit the images they get.'''
     def __init__(self,screen_width,screen_height):
-        print('New display bundle created.')
         self.screen_height=screen_height
         self.screen_width=screen_width
     

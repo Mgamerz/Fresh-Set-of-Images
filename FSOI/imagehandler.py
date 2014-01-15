@@ -113,12 +113,10 @@ class imagehandler:
             if plugin[self.PLUGINID]!='undefined':
                 self.downloaders[plugin[self.PLUGINID]]=plugin[self.PLUGINOBJ] #set all the plugins via this map.
                 info=plugin[self.PLUGINOBJ].get_source_info()
-                print('Enable disable:',plugin[0],plugin[self.PLUGINSTATUS])
                 if plugin[self.PLUGINSTATUS]==False:
                     info.insert(0,'Disabled') #Put disabled in.
                 else:
                     info.insert(0,'') #Empty status - the database of enabled/disabled will set if this is enabled or disabled at a later stage
-                print(info)
                 info.insert(0,plugin[self.PLUGINID]) #insert ID as first element.
                 sourcesinfo.append(info)
             else:
@@ -163,7 +161,7 @@ class imagehandler:
         dependencies = plugin.get_dependencies()
         for dependency in dependencies:
             try:
-                print(plugin.pluginid,dependency)
+                #print(plugin.pluginid,dependency)
                 importlib.import_module(dependency) #checking for installed dependency
             except ImportError:
                 # dependency doesn't exist-check for local version
@@ -173,7 +171,7 @@ class imagehandler:
                     loader = importlib.machinery.SourceFileLoader(dependency,os.path.dirname(os.path.abspath(inspect.getfile(plugin.__class__)))+os.sep+dependency+'.py')
                     loader.load_module(dependency) #if this works, the module will be able to load this dependency in the load_plugin() method it has.
                 except (ImportError, FileNotFoundError):
-                    print('No same-folder dependency found.')
+                    print('%s: No same-folder dependency found. Plugin will partially load but will be disabled.' % plugin.pluginid)
                     return False
         return True
         

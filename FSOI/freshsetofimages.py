@@ -204,8 +204,8 @@ class FSIGUI:
         #first delete all items in the tree.
         children=self.sources.get_children()
         if children:
-            print(children)
-            self.sources.delete(children)
+            for child in children:
+                self.sources.delete(child)
         
         treedata=self.imageutils.getTreeSources()
         for source in treedata:
