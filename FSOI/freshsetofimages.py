@@ -176,6 +176,7 @@ class FSIGUI:
                             'http://freshset.mgamerzproductions.com/versions.ini')
             data = request.content
             data=data.decode(encoding='UTF-8')
+            request.close()
             config = configparser.ConfigParser()
             config.read_string(data)
             if StrictVersion(self.APP_VERSION) < StrictVersion(config['VERSIONS']['latest']):
