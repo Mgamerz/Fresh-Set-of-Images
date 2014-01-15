@@ -19,7 +19,7 @@ from tkinter.filedialog import askdirectory
 class FSIGUI:
     
     def __init__(self):
-        self.APP_VERSION='0.1'
+        self.APP_VERSION='0.2'
         self.imageutils=imagehandler.imagehandler(self)
         self.setupUI()
 
