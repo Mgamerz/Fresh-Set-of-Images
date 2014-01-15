@@ -3,6 +3,9 @@
 # C extensions
 *.so
 
+#files
+epsettings.ini
+
 # Packages
 *.egg
 *.egg-info
