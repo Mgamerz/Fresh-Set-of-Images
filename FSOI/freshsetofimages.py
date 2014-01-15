@@ -8,6 +8,7 @@ import os
 import time
 import configparser
 import imagehandler
+import threading
 from distutils.version import StrictVersion
 
 from tkinter import *
@@ -128,7 +129,7 @@ class FSIGUI:
         # debug
         debugframe = ttk.Frame(note)
         ttk.Button(debugframe, text='Check for updates',
-                   command=self.updateCheck).grid(column=0, row=2)
+                   command=self.update_check).grid(column=0, row=2)
         ttk.Button(debugframe, text='Print source modules',
                    command=self.imageutils.get_sources).grid(column=0, row=1)
 
@@ -140,7 +141,10 @@ class FSIGUI:
         self.loadSettings()
         self.populateTree()
         self.root.mainloop()
-
+        
+    def update_check(self):
+        threading.Thread(target=self.updateCheck).start()
+        
     def rightclick_listitem(self, event):
         rowitem = self.sources.identify('item', event.x, event.y)
 
@@ -171,12 +175,17 @@ class FSIGUI:
         self.plugin_location.insert(0, pathdir)
 
     def updateCheck(self):
+        print('Checking for updates.')
+        '''Fetch an update. Should run on a background thread.'''
         try:
+            self.progressbar.config(mode='indeterminate')
+            self.progressbar.start()
+            
             request = requests.get(
-                            'http://freshset.mgamerzproductions.com/versions.ini')
+                            'http://freshset.mgamerzproductions.com/versions.ini',headers={'Connection':'close'})
             data = request.content
             data=data.decode(encoding='UTF-8')
-            request.close()
+            
             config = configparser.ConfigParser()
             config.read_string(data)
             if StrictVersion(self.APP_VERSION) < StrictVersion(config['VERSIONS']['latest']):
@@ -184,9 +193,13 @@ class FSIGUI:
                       config['VERSIONS']['latest'], config['VERSIONS']['url'])
 
             else:
+                
                 print('No updates available.')
         except Exception as e:
             print('Error occured checking for updates: {}'.format(e))
+            self.progressbar.stop()
+            self.progressbar.config(mode='determinate')
+            self.progress.set(0)
 
     def getDownloadPath(self):
         startdir = None
