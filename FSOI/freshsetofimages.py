@@ -173,8 +173,9 @@ class FSIGUI:
     def updateCheck(self):
         try:
             request = requests.get(
-                            'https://github.com/Mgamerz/Fresh-Set-of-Images/releases')
+                            'http://freshset.mgamerzproductions.com/versions.ini')
             data = request.content
+            data=data.decode(encoding='UTF-8')
             config = configparser.ConfigParser()
             config.read_string(data)
             if StrictVersion(self.APP_VERSION) < StrictVersion(config['VERSIONS']['latest']):
@@ -184,7 +185,7 @@ class FSIGUI:
             else:
                 print('No updates available.')
         except Exception as e:
-            print('Error occured checking for updates'.format(e))
+            print('Error occured checking for updates: {}'.format(e))
 
     def getDownloadPath(self):
         startdir = None

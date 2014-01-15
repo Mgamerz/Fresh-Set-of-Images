@@ -169,6 +169,8 @@ class imagehandler:
                                 print(
                                     c, 'is not fully defined (or type error occured), cannot fully load plugin:', error)
                                 continue
+                            except Exception as error:
+                                print('{} encountered a fatal error and cannot be loaded.',c)
                             if not self.load_plugin_dependencies(plugin):
                                 # add it to the list of plugins. It was able to
                                 # load, but we won't enable it, and the user
