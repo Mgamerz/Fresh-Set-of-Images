@@ -9,11 +9,13 @@ import os
 import urllib
 import importlib
 import re
+import sqlite3
 import shelve
 import SourceBase
 from contextlib import closing
 import inspect
 import importlib.machinery
+from datetime import datetime
 
 
 class imagehandler:
@@ -191,20 +193,27 @@ class imagehandler:
     def load_plugin_database(self,sourcesinfo):
         '''Reads the plugin database, and configures previous on/off configurations.
         '''
-        
         pluginpath = self.parent.plugin_location.get() #Should eventually put htis in a try block.
         db_file = '{}plugins.db'.format(pluginpath)
-        print(db_file,'load database')
-        with closing(shelve.open(db_file)) as pdb:
-            print(list(pdb.keys()))
+        if os.path.exists(db_file):
+            conn = sqlite3.connect(db_file)
+            c = conn.cursor()
             for source in sourcesinfo:
                 if source[1]=='':
-                    #Not disabled
-                    print('Loading from database.')
-                    try:
-                        source[1]=pdb[source[0]]
-                    except:
-                        print('Plugin %s isn\'t in the database. It will default to true.' % source[0])
+                    print(source[0])
+                    c.execute('SELECT * FROM plugin_state WHERE Name=?',(source[0],))
+                    state = c.fetchone()
+                    if state:
+                        print(state)
+                        source[1]=state[1]
+                    #print(c.fetchone())
+        else:
+            print('Database file was not found. Creating one now.')
+            conn = sqlite3.connect(db_file)
+            c = conn.cursor()
+            c.execute('CREATE TABLE plugin_state (Name TEXT UNIQUE, State TEXT, Last_new TEXT)')
+            conn.commit()
+            c.close()
         return sourcesinfo
             
     def load_plugin_dependencies(self, plugin):

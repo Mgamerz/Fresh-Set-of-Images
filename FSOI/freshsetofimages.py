@@ -9,9 +9,10 @@ import time
 import configparser
 import imagehandler
 import threading
-import shelve
+import sqlite3
 from contextlib import closing
 from distutils.version import StrictVersion
+from datetime import datetime
 
 from tkinter import *
 from tkinter import ttk
@@ -240,14 +241,14 @@ class FSIGUI:
             self.sources.item(item, values=vals)
             pluginpath = self.plugin_location.get() #Should eventually put htis in a try block.
             db_file = '{}plugins.db'.format(pluginpath)
-            print(db_file,'doubleclick')
-            if os.path.isfile('{}.dat'.format(db_file)):
-                with closing(shelve.open(db_file, writeback=True)) as pdb:
-                    try:
-                        print('Writing keys %s to %s',(item,vals[0]))
-                        pdb[item]=vals[0]
-                    except:
-                        print('Couldn\'t write to the DB.')
+            #print(db_file,'doubleclick')
+            conn = sqlite3.connect(db_file)
+            c = conn.cursor()
+            print(item)
+            c.execute('INSERT or REPLACE INTO plugin_state VALUES(?,?,?)',(item,vals[0],str(datetime.now())))
+            #c.execute('INSERT or REPLACE INTO plugin_state VALUES(\'_fsiplugin_bing\', \'Yes\', \'TODAY\')')
+            conn.commit()
+            c.close()
             self.update_row_color(item)
 
     def populateTree(self):
