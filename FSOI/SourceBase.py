@@ -44,6 +44,10 @@ class SourceBase(metaclass=abc.ABCMeta):
         '''
         return
 
+    def filename_from_url(self, url):
+        '''Convenience method so plugins can get filename from a given URL.'''
+        return (url).split('/')[-1] #get filename
+
     @abc.abstractmethod
     def get_dependencies(self):
         '''This method should return a list of package names. The host program will check if these packages are available.

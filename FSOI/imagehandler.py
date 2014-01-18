@@ -6,16 +6,15 @@
 import threading
 import queue
 import os
+import requests
 import urllib
 import importlib
-import re
-import sqlite3
-import shelve
 import SourceBase
-from contextlib import closing
+import sqlite3
+from tkinter import *
+from tkinter import ttk
 import inspect
 import importlib.machinery
-from datetime import datetime
 
 
 class imagehandler:
@@ -32,7 +31,7 @@ class imagehandler:
     def get_images(self, displaybundle):
         # build a list of sites to query based on the treeview object
         sources = self.parent.sources.get_children()
-        if sources == None:
+        if not sources:
             return
 
         for source in sources:
@@ -102,6 +101,7 @@ class imagehandler:
                 self.parent.updateprogress(taskscompleted, tasks)
                 fileinfo = self.downloadqueue.get(0)
                 print('Downloading', fileinfo[0])
+
                 urllib.request.urlretrieve(
                     fileinfo[0], self.parent.download_location.get() + fileinfo[1])
                 taskscompleted += 1
@@ -111,6 +111,9 @@ class imagehandler:
         self.parent.updateprogress(taskscompleted, tasks)
         self.parent.status.set('Images downloaded.')
         self.parent.downloadButton.config(state='enabled')
+
+    def plugin_configure(self, plugin_id):
+        self.downloaders[plugin_id].configure(self.parent.root)
 
     def getTreeSources(self):
         '''Gets a list of sources that can be downloaded from.
@@ -139,7 +142,7 @@ class imagehandler:
             else:
                 print('Plugin', plugin[0],
                       'does not have the id set, ignoring.')
-        sourcesinfo=self.load_plugin_database(sourcesinfo)
+        sourcesinfo = self.load_plugin_database(sourcesinfo)
         return sourcesinfo
 
     def get_sources(self):

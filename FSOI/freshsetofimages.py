@@ -35,6 +35,7 @@ class FSIGUI:
         if sys.platform == 'darwin':
             RIGHTMOUSE = '<Button-2>'
         self.root = Tk()
+        self.root.protocol('WM_DELETE_WINDOW', exit)
 
         # basic properties
         self.progress = IntVar()
@@ -161,9 +162,9 @@ class FSIGUI:
         if plugin_disabled:
             rcmenu.add_command(label='Plugin is disabled...',
                                command=self.plugin_disabled_click)
-        rcmenu.add_command(label='Plugin options',state='disabled' if plugin_disabled else 'active')
+        rcmenu.add_command(label='Plugin options', state='disabled' if plugin_disabled else 'active', command=lambda: self.imageutils.plugin_configure(rowitem))
         rcmenu.add_command(label='Uninstall plugin')
-        rcmenu.post(event.x_root, event.y_root)
+        rcmenu.tk_popup(event.x_root, event.y_root)
 
     def plugin_disabled_click(self):
         PluginDisabledDialog(self.root)
