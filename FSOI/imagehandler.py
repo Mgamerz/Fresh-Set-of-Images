@@ -63,6 +63,7 @@ class imagehandler:
                 except Exception as error:
                     print('Error getting images from',
                           sourceinfo.pluginid, ':', error)
+                    raise(error)
                 if newimages:
                     for imageinfo in newimages:
                         # check to make sure image doesn't already exist.
@@ -125,23 +126,26 @@ class imagehandler:
         sourcesinfo = []
         self.plugins = self.get_sources()
         for plugin in self.plugins:
-            if plugin[self.PLUGINID] != 'undefined':
-                # set all the plugins via this map.
-                self.downloaders[plugin[self.PLUGINID]
-                                 ] = plugin[self.PLUGINOBJ]
-                info = plugin[self.PLUGINOBJ].get_source_info()
-                if plugin[self.PLUGINSTATUS] == False:
-                    info.insert(0, 'Disabled')  # Put disabled in.
+            try:
+                if plugin[self.PLUGINID] != 'undefined':
+                    # set all the plugins via this map.
+                    self.downloaders[plugin[self.PLUGINID]
+                                     ] = plugin[self.PLUGINOBJ]
+                    info = plugin[self.PLUGINOBJ].get_source_info()
+                    if plugin[self.PLUGINSTATUS] == False:
+                        info.insert(0, 'Disabled')  # Put disabled in.
+                    else:
+                        # Empty status - the database of enabled/disabled will set
+                        # if this is enabled or disabled at a later stage
+                        info.insert(0, '')
+                    # insert ID as first element.
+                    info.insert(0, plugin[self.PLUGINID])
+                    sourcesinfo.append(info)
                 else:
-                    # Empty status - the database of enabled/disabled will set
-                    # if this is enabled or disabled at a later stage
-                    info.insert(0, '')
-                # insert ID as first element.
-                info.insert(0, plugin[self.PLUGINID])
-                sourcesinfo.append(info)
-            else:
-                print('Plugin', plugin[0],
-                      'does not have the id set, ignoring.')
+                    print('Plugin', plugin[0],
+                          'does not have the id set, ignoring.')
+            except Exception as e:
+                print('Plugin failed to load: {}'.format(e))
         sourcesinfo = self.load_plugin_database(sourcesinfo)
         return sourcesinfo
 

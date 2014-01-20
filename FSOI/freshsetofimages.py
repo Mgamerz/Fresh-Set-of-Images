@@ -10,7 +10,6 @@ import configparser
 import imagehandler
 import threading
 import sqlite3
-from contextlib import closing
 from distutils.version import StrictVersion
 from datetime import datetime
 
